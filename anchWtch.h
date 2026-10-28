@@ -65,27 +65,25 @@ class anchWtch :	public panel {
 				anchWtch(int newAppID);
 	virtual	~anchWtch(void);
 	
-				fontLabel*	setupField(int inX,int inY,const char* labelTxt,double inVal,int fixVal);
-				fontLabel*	setupField(int inX,int inY,const char* labelTxt,const char* inStr);
-	virtual	void			setup(void);		// Run once. do your setup here.
-	virtual	void			loop(void);			// Run over and over. Do stuff here.
-	virtual	void			drawSelf(void);	// If you want to draw your background, do it here.
-	virtual	void			closing(void);		// Need to save anything before closing shop? Do it here.
+				erasableText*	setupField(int inX,int inY,const char* labelTxt);
+	virtual	void				setup(void);		// Run once. do your setup here.
+	virtual	void				loop(void);			// Run over and over. Do stuff here.
+	virtual	void				drawSelf(void);	// If you want to draw your background, do it here.
+	virtual	void				closing(void);		// Need to save anything before closing shop? Do it here.
+				void				calculateItems(void);
+				
+				erasableText*	depthFld;
+				erasableText*	scopeFld;
+				erasableText*	calcRodeFld;
+				erasableText*	marginFld;
+				erasableText*	calcRadiusFld;
+				erasableText*	totalRadiusFld;
+				
+				double	depth;
+				double	calcRode;
+				double	calcRad;
+				double	calcTotal;
 	
-				//anchWtchValueField*	depthFld;
-				//anchWtchValueField*	scopeFld;
-				//anchWtchValueField*	calcRodeFld;
-				//anchWtchValueField*	marginFld;
-				//anchWtchValueField*	calcRadiusFld;
-				//anchWtchValueField*	totalRadiusFld;
-				
-				fontLabel*	depthFld;
-				fontLabel*	scopeFld;
-				fontLabel*	calcRodeFld;
-				fontLabel*	marginFld;
-				fontLabel*	calcRadiusFld;
-				fontLabel*	totalRadiusFld;
-				
 				setLocationBtn*		locationBtn;
 				setWatchBtn*			watchBtn;
 				bool						editing;

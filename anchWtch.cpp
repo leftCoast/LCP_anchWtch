@@ -1,82 +1,17 @@
 
 #include <anchWtch.h>
+#include <navOS.h>
 #include <navigation.h>
 #include <debug.h>
 
-
-// **********************************************************************
-// setLocationBtn
-// **********************************************************************
-
-
-setLocationBtn::setLocationBtn(int xLoc,int yLoc,const char* path)
-	: iconButton(xLoc,yLoc,path,60) {  }
-	
-	
-setLocationBtn::~setLocationBtn(void) {  }
-	
-	
-void setLocationBtn::doAction(void) {
-
-
-}
-
-	
-	
-// **********************************************************************
-// setWatchBtn
-// **********************************************************************
-
-
-setWatchBtn::setWatchBtn(int xLoc,int yLoc,const char* path)
-	: iconButton(xLoc,yLoc,path,60) {  }
-	
-	
-setWatchBtn::~setWatchBtn(void) {  }
-	
-void setWatchBtn::doAction(void) {
-
-
-}
-
-
-// **********************************************************************
-// anchWtchValueField
-// **********************************************************************
-
-
-anchWtchValueField::anchWtchValueField(rect* inRect,const char* inMsg)
-	: valueField(inRect,inMsg) {  }
-	
-	
-anchWtchValueField::~anchWtchValueField(void) {  }
-
-/*	
-void anchWtchValueField::doAction(void) {
-
-
-}
-*/
-
-//void anchWtchValueField::handleCom(stdComs comID) {
-	
-
-//}
-
-
-// **********************************************************************
-// anchWtch
-// **********************************************************************
-
-//#define MSG_BYTES			40
 
 #define FIELD_W			55
 #define FIELD_H			28
 
 #define DIA_X				50
-#define DIA_Y				164
+#define DIA_Y				137
 #define DIA_W				222 
-#define DIA_H				145
+#define DIA_H				172
 #define DIA_NAME			"anchDia.bmp"
 
 #define DEPTH_X			38
@@ -119,6 +54,67 @@ void anchWtchValueField::doAction(void) {
 
 
 
+// **********************************************************************
+// setLocationBtn
+// **********************************************************************
+
+
+setLocationBtn::setLocationBtn(int xLoc,int yLoc,const char* path)
+	: iconButton(xLoc,yLoc,path,60) {  }
+	
+	
+setLocationBtn::~setLocationBtn(void) {  }
+	
+	
+void setLocationBtn::doAction(void) { ((anchWtch*)(ourPanel))->calculateItems(); }
+
+	
+	
+// **********************************************************************
+// setWatchBtn
+// **********************************************************************
+
+
+setWatchBtn::setWatchBtn(int xLoc,int yLoc,const char* path)
+	: iconButton(xLoc,yLoc,path,60) {  }
+	
+	
+setWatchBtn::~setWatchBtn(void) {  }
+
+
+void setWatchBtn::doAction(void) { nextPanel = runWatchApp; }
+
+
+// **********************************************************************
+// anchWtchValueField
+// **********************************************************************
+
+
+anchWtchValueField::anchWtchValueField(rect* inRect,const char* inMsg)
+	: valueField(inRect,inMsg) {  }
+	
+	
+anchWtchValueField::~anchWtchValueField(void) {  }
+
+/*	
+void anchWtchValueField::doAction(void) {
+
+
+}
+*/
+
+//void anchWtchValueField::handleCom(stdComs comID) {
+	
+
+//}
+
+
+
+// **********************************************************************
+// anchWtch
+// **********************************************************************
+
+
 anchWtch::anchWtch(int newAppID)
 	: panel(newAppID) { }
 
@@ -126,31 +122,12 @@ anchWtch::anchWtch(int newAppID)
 anchWtch::~anchWtch(void) {  }
 
 
-fontLabel* anchWtch::setupField(int inX,int inY,const char* labelTxt,double inVal,int fixVal) {
-
-	unsigned long	multiplyer;
-	char				fixStr[10];
-	char				format[10];
-	char				buff[40];
+erasableText* anchWtch::setupField(int inX,int inY,const char* labelTxt) {
 	
-	multiplyer = pow(10,fixVal);
-	inVal = inVal * multiplyer;
-	round(inVal);
-	inVal = inVal/multiplyer;
-	strcpy(format,"%4.");
-	strcat(format,itoa(fixVal,fixStr,10));
-	strcat(format,"f");
-	sprintf(buff,format,inVal);
-	return setupField(inX,inY,labelTxt,buff);
-}
-
-
-fontLabel* anchWtch::setupField(int inX,int inY,const char* labelTxt,const char* inStr) {
-	
-	rect			frame(inX,inY,FIELD_W,FIELD_H);
-	rectObj*		ourRectObj;
-	fontLabel*	valueLbl;
-	label*		itemlabel;
+	rect				frame(inX,inY,FIELD_W,FIELD_H);
+	rectObj*			ourRectObj;
+	erasableText*	valueLbl;
+	label*			itemlabel;
 	
 	ourRectObj = new rectObj(&frame);
 	if (ourRectObj) {
@@ -162,10 +139,11 @@ fontLabel* anchWtch::setupField(int inX,int inY,const char* labelTxt,const char*
 			itemlabel->setValue(labelTxt);
 			addObj(itemlabel);
 			frame.insetRect(3);
-			valueLbl = new fontLabel(&frame);
+			frame.moveRect(0,2);
+			valueLbl = new erasableText(&frame);
 			if (valueLbl) {
 				ourTxtPallette.setTypeFace(valueLbl,smallValues);
-				valueLbl->setValue(inStr);
+				valueLbl->setEventSet(fullClick);
 				addObj(valueLbl);
 				return valueLbl;
 			}
@@ -177,32 +155,22 @@ fontLabel* anchWtch::setupField(int inX,int inY,const char* labelTxt,const char*
 		
 void anchWtch::setup(void) {
 	
-	rect	frame;
-	double	depth;
-	double calcRode;
-	double	calcRad;
-	double calcTotal;
-	frame.setRect(DIA_X,DIA_Y,DIA_W,DIA_H);
+	rect		frame;
 	
+	frame.setRect(DIA_X,DIA_Y,DIA_W,DIA_H);
 	setFilePath(DIA_NAME);
 	bmpObj* theDiagram = new bmpObj(&frame,mFilePath);
 	if (theDiagram) {
 		addObj(theDiagram);
 	}
 	
-	depth = 5; //ourNavigator->getDepth();
-	calcRode = depth * scopeValue;
-	calcRad = sqrt(abs(pow(calcRode,2) - pow(depth,2)));
-	calcTotal = (calcRad*6) + anchorMargin;
-	
-	depthFld = setupField(DEPTH_X,DEPTH_Y,"Depth",depth,1);
-	scopeFld = setupField(SCOPE_X,SCOPE_Y,"Scope",scopeValue,1);
-	calcRodeFld = setupField(CALC_RODE_X,CALC_RODE_Y,"Rode",calcRode,1);
-	marginFld = setupField(MARGIN_X,MARGIN_Y,"Margin",anchorMargin,0);
-	totalRadiusFld = setupField(CALC_TOTAL_X,CALC_TOTAL_Y,"Swing",calcTotal,0);
-	
-	
-	
+	depthFld = setupField(DEPTH_X,DEPTH_Y,"Depth Fm");
+	scopeFld = setupField(SCOPE_X,SCOPE_Y,"Scope x");
+	calcRodeFld = setupField(CALC_RODE_X,CALC_RODE_Y,"Rode Fm");
+	calcRadiusFld = setupField(CALC_RAD_X,CALC_RAD_Y,"Radius Ft");
+	marginFld = setupField(MARGIN_X,MARGIN_Y,"Margin Ft");
+	totalRadiusFld = setupField(CALC_TOTAL_X,CALC_TOTAL_Y,"Swing Ft");
+	calculateItems();
 	
 	setFilePath(LOC_BTN);
 	locationBtn = new setLocationBtn(LOC_BTN_X,LOC_BTN_Y,mFilePath);
@@ -219,10 +187,28 @@ void anchWtch::setup(void) {
 }
 
 
+void anchWtch::calculateItems(void) {
+
+	depth = ourNavigator->getDepth(); // Fathoms
+	
+	calcRode = depth * scopeValue; // Fathoms
+	calcRad = sqrt(abs(pow(calcRode,2) - pow(depth,2)));	// Fathoms
+	calcRad = calcRad * 6;	// Feet
+	calcTotal = calcRad + anchorMargin; // Feet
+	
+	depthFld->setValue(depth);
+	scopeFld->setValue(scopeValue);
+	calcRodeFld->setValue(calcRode);
+	calcRadiusFld->setValue(calcRad);
+	marginFld->setValue(anchorMargin);
+	totalRadiusFld->setValue(calcTotal);
+}
+	
+	
 void anchWtch::loop(void) {  }
 
 
-void anchWtch::drawSelf(void) { screen->fillRect(this,&black); }
+void anchWtch::drawSelf(void) { screen->fillScreen(&black); }
 
 
 void anchWtch::closing(void) {  }
