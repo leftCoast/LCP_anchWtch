@@ -4,6 +4,9 @@
 #include <navigation.h>
 #include <debug.h>
 
+#define ANCHOR_X	60
+#define ANCHOR_Y	16
+
 
 #define FIELD_W			55
 #define FIELD_H			28
@@ -111,10 +114,16 @@ void watchField::updateValue(const char* newValue) {
 	switch(ourType) {
 		case noParam		: 																		break;	// Nothing we can do.
 		case depthParam	: ((anchWtch*)ourPanel)->depth = atof(newValue);		break;
-		case scopeParam	: scopeValue = atof(newValue);								break;
+		case scopeParam	: 
+			scopeValue = atof(newValue);
+			savePrefs();
+		break;
 		case rodeParam		: ((anchWtch*)ourPanel)->calcRode = atof(newValue);	break;
 		case radiusParam	: ((anchWtch*)ourPanel)->calcRad = atof(newValue);		break;
-		case marginParam	: anchorMargin = atof(newValue);								break;
+		case marginParam	:
+			anchorMargin = atof(newValue);
+			savePrefs();
+		break;
 		case swingParam	: ((anchWtch*)ourPanel)->calcTotal = atof(newValue);	break;
 	}
 	((anchWtch*)ourPanel)->calculateItems();
@@ -166,7 +175,14 @@ watchField* anchWtch::setupField(int inX,int inY,const char* labelTxt,const char
 		
 void anchWtch::setup(void) {
 	
-	rect		frame;
+	rect			frame;
+	fontLabel*	aLbl;
+	
+	frame.setRect(ANCHOR_X,ANCHOR_Y,200,30);
+	aLbl = new fontLabel(&frame);
+	ourTxtPallette.setTypeFace(aLbl,panelTitle);
+	aLbl->setValue("Anchor setup");
+	addObj(aLbl);
 	
 	frame.setRect(DIAGRAM_X,DIAGRAM_Y,DIAGRAM_W,DIAGRAM_H);
 	setFilePath(DIAGRAM_NAME);
