@@ -8,34 +8,40 @@
 #define FIELD_W			55
 #define FIELD_H			28
 
-#define DIA_X				50
-#define DIA_Y				137
-#define DIA_W				222 
-#define DIA_H				172
-#define DIA_NAME			"anchDia.bmp"
+#define DIAGRAM_X			50
+#define DIAGRAM_Y			137
+#define DIAGRAM_W			222 
+#define DIAGRAM_H			172
+#define DIAGRAM_NAME		"anchDia.bmp"
 
 #define DEPTH_X			38
 #define DEPTH_Y			320
+#define DEPTH_LBL			"Depth Fm"
 #define DEPTH_MSG			"Depth as read from the depth sounder."
 
 #define SCOPE_X			136
 #define SCOPE_Y			80
+#define SCOPE_LBL			"Scope x"
 #define SCOPE_MSG			"Scope from your settings. 1:X where this is the X value."
 
 #define CALC_RAD_X		136
 #define CALC_RAD_Y		130
+#define CALC_RAD_LBL		"Radius Ft"
 #define CALC_RAD_MSG		"Calculated swing radius in feet."
 
 #define CALC_RODE_X		160
 #define CALC_RODE_Y		240
-#define CALC_RAD_MSG		"Calculated amount of rode in fathoms."
+#define CALC_ROAD_LBL	"Rode Fm"
+#define CALC_ROAD_MSG	"Calculated amount of rode in fathoms."
 
 #define MARGIN_X			242
 #define MARGIN_Y			130
+#define MARGIN_LBL		"Margin Ft"
 #define MARGIN_MSG		"Added distance in feet to add to the swing radius."
 
 #define CALC_TOTAL_X		160
 #define CALC_TOTAL_Y		320
+#define CALC_TOTAL_LBL	"Swing Ft"
 #define CALC_TOTAL_MSG	"Calcualted total swing radius including your margin value in feet."
 
 #define SET_LOC_X			37
@@ -51,7 +57,6 @@
 #define WATCH_BTN_X		130
 #define WATCH_BTN_Y		378
 #define WATCH_BTN			"hook60g.bmp"
-
 
 
 // **********************************************************************
@@ -86,28 +91,34 @@ void setWatchBtn::doAction(void) { nextPanel = runWatchApp; }
 
 
 // **********************************************************************
-// anchWtchValueField
+// watchField
 // **********************************************************************
 
 
-anchWtchValueField::anchWtchValueField(rect* inRect,const char* inMsg)
-	: valueField(inRect,inMsg) {  }
+watchField::watchField(rect* inRect,valueType inType,const char* inMsg)
+	: valueField(inRect,inType,inMsg) { ourType = noParam; }
 	
 	
-anchWtchValueField::~anchWtchValueField(void) {  }
-
-/*	
-void anchWtchValueField::doAction(void) {
+watchField::~watchField(void) {  }
 
 
+void watchField::seType(paramChoice inParam) { ourType = inParam; }
+
+			
+void watchField::updateValue(const char* newValue) {
+
+	valueField::updateValue(newValue);
+	switch(ourType) {
+		case noParam		: 																		break;	// Nothing we can do.
+		case depthParam	: ((anchWtch*)ourPanel)->depth = atof(newValue);		break;
+		case scopeParam	: scopeValue = atof(newValue);								break;
+		case rodeParam		: ((anchWtch*)ourPanel)->calcRode = atof(newValue);	break;
+		case radiusParam	: ((anchWtch*)ourPanel)->calcRad = atof(newValue);		break;
+		case marginParam	: anchorMargin = atof(newValue);								break;
+		case swingParam	: ((anchWtch*)ourPanel)->calcTotal = atof(newValue);	break;
+	}
+	((anchWtch*)ourPanel)->calculateItems();
 }
-*/
-
-//void anchWtchValueField::handleCom(stdComs comID) {
-	
-
-//}
-
 
 
 // **********************************************************************
@@ -122,12 +133,12 @@ anchWtch::anchWtch(int newAppID)
 anchWtch::~anchWtch(void) {  }
 
 
-erasableText* anchWtch::setupField(int inX,int inY,const char* labelTxt) {
+watchField* anchWtch::setupField(int inX,int inY,const char* labelTxt,const char* inMsg) {
 	
-	rect				frame(inX,inY,FIELD_W,FIELD_H);
-	rectObj*			ourRectObj;
-	erasableText*	valueLbl;
-	label*			itemlabel;
+	rect						frame(inX,inY,FIELD_W,FIELD_H);
+	rectObj*					ourRectObj;
+	watchField*	valueLbl;
+	label*					itemlabel;
 	
 	ourRectObj = new rectObj(&frame);
 	if (ourRectObj) {
@@ -140,7 +151,7 @@ erasableText* anchWtch::setupField(int inX,int inY,const char* labelTxt) {
 			addObj(itemlabel);
 			frame.insetRect(3);
 			frame.moveRect(0,2);
-			valueLbl = new erasableText(&frame);
+			valueLbl = new watchField(&frame,aNumber,inMsg);
 			if (valueLbl) {
 				ourTxtPallette.setTypeFace(valueLbl,smallValues);
 				valueLbl->setEventSet(fullClick);
@@ -157,19 +168,40 @@ void anchWtch::setup(void) {
 	
 	rect		frame;
 	
-	frame.setRect(DIA_X,DIA_Y,DIA_W,DIA_H);
-	setFilePath(DIA_NAME);
+	frame.setRect(DIAGRAM_X,DIAGRAM_Y,DIAGRAM_W,DIAGRAM_H);
+	setFilePath(DIAGRAM_NAME);
 	bmpObj* theDiagram = new bmpObj(&frame,mFilePath);
 	if (theDiagram) {
 		addObj(theDiagram);
 	}
+				
+	depthFld = setupField(DEPTH_X,DEPTH_Y,DEPTH_LBL,DEPTH_MSG);
+	if (depthFld) {
+		depthFld->seType(depthParam);
+	}
+
+	scopeFld = setupField(SCOPE_X,SCOPE_Y,SCOPE_LBL,SCOPE_MSG);
+	if (scopeFld) {
+		scopeFld->seType(scopeParam);
+	}
 	
-	depthFld = setupField(DEPTH_X,DEPTH_Y,"Depth Fm");
-	scopeFld = setupField(SCOPE_X,SCOPE_Y,"Scope x");
-	calcRodeFld = setupField(CALC_RODE_X,CALC_RODE_Y,"Rode Fm");
-	calcRadiusFld = setupField(CALC_RAD_X,CALC_RAD_Y,"Radius Ft");
-	marginFld = setupField(MARGIN_X,MARGIN_Y,"Margin Ft");
-	totalRadiusFld = setupField(CALC_TOTAL_X,CALC_TOTAL_Y,"Swing Ft");
+	calcRodeFld = setupField(CALC_RODE_X,CALC_RODE_Y,CALC_ROAD_LBL,CALC_ROAD_MSG);
+	if (calcRodeFld) {
+		calcRodeFld->seType(rodeParam);
+	}
+	calcRadiusFld = setupField(CALC_RAD_X,CALC_RAD_Y,CALC_RAD_LBL,CALC_RAD_MSG);
+	if (calcRadiusFld) {
+		calcRadiusFld->seType(radiusParam);
+	}
+	marginFld = setupField(MARGIN_X,MARGIN_Y,MARGIN_LBL,MARGIN_MSG);
+	if (marginFld) {
+		marginFld->seType(marginParam);
+	}
+	totalRadiusFld = setupField(CALC_TOTAL_X,CALC_TOTAL_Y,CALC_TOTAL_LBL,CALC_TOTAL_MSG);
+	if (totalRadiusFld) {
+		totalRadiusFld->seType(swingParam);
+	}
+	
 	calculateItems();
 	
 	setFilePath(LOC_BTN);
@@ -189,7 +221,7 @@ void anchWtch::setup(void) {
 
 void anchWtch::calculateItems(void) {
 
-	depth = ourNavigator->getDepth(); // Fathoms
+	depth = 5.2;	//ourNavigator->getDepth(); // Fathoms
 	
 	calcRode = depth * scopeValue; // Fathoms
 	calcRad = sqrt(abs(pow(calcRode,2) - pow(depth,2)));	// Fathoms

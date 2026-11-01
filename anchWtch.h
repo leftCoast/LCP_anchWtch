@@ -39,18 +39,31 @@ class setWatchBtn :	public iconButton {
 
 
 // **********************************************************************
-// anchWtchValueField
+// watchField
 // **********************************************************************
 
+enum paramChoice {
+	
+	noParam,
+	depthParam,
+	scopeParam,
+	rodeParam,
+	radiusParam,
+	marginParam,
+	swingParam
+};
 
-class anchWtchValueField :	public valueField {
+
+class watchField :	public valueField {
 
 	public:
-				anchWtchValueField(rect* inRect,const char* inMsg);
-	virtual	~anchWtchValueField(void);
+				watchField(rect* inRect,valueType inType,const char* inMsg);
+	virtual	~watchField(void);
 	
-	//virtual	void	doAction(void);
-	//virtual	void	handleCom(stdComs comID);
+				void		seType(paramChoice inParam);
+	virtual	void		updateValue(const char* newValue);
+	
+				paramChoice	ourType;
 };
 
 
@@ -65,28 +78,27 @@ class anchWtch :	public panel {
 				anchWtch(int newAppID);
 	virtual	~anchWtch(void);
 	
-				erasableText*	setupField(int inX,int inY,const char* labelTxt);
-	virtual	void				setup(void);		// Run once. do your setup here.
-	virtual	void				loop(void);			// Run over and over. Do stuff here.
-	virtual	void				drawSelf(void);	// If you want to draw your background, do it here.
-	virtual	void				closing(void);		// Need to save anything before closing shop? Do it here.
-				void				calculateItems(void);
+				watchField*	setupField(int inX,int inY,const char* labelTxt,const char* inMsg);
+	virtual	void			setup(void);		// Run once. do your setup here.
+	virtual	void			loop(void);			// Run over and over. Do stuff here.
+	virtual	void			drawSelf(void);	// If you want to draw your background, do it here.
+	virtual	void			closing(void);		// Need to save anything before closing shop? Do it here.
+				void			calculateItems(void);
 				
-				erasableText*	depthFld;
-				erasableText*	scopeFld;
-				erasableText*	calcRodeFld;
-				erasableText*	marginFld;
-				erasableText*	calcRadiusFld;
-				erasableText*	totalRadiusFld;
+				watchField*	depthFld;
+				watchField*	scopeFld;
+				watchField*	calcRodeFld;
+				watchField*	marginFld;
+				watchField*	calcRadiusFld;
+				watchField*	totalRadiusFld;
 				
-				double	depth;
-				double	calcRode;
-				double	calcRad;
-				double	calcTotal;
+				float	depth;
+				float	calcRode;
+				float	calcRad;
+				float	calcTotal;
 	
-				setLocationBtn*		locationBtn;
-				setWatchBtn*			watchBtn;
-				bool						editing;
+				setLocationBtn*	locationBtn;
+				setWatchBtn*		watchBtn;
 };
 				
 
