@@ -237,7 +237,7 @@ void anchWtch::setup(void) {
 
 void anchWtch::calculateItems(void) {
 
-	depth = 5.2;	//ourNavigator->getDepth(); // Fathoms
+	depth = ourNavigator->getDepth(); // Fathoms
 	
 	calcRode = depth * scopeValue; // Fathoms
 	calcRad = sqrt(abs(pow(calcRode,2) - pow(depth,2)));	// Fathoms
