@@ -144,10 +144,10 @@ anchWtch::~anchWtch(void) {  }
 
 watchField* anchWtch::setupField(int inX,int inY,const char* labelTxt,const char* inMsg) {
 	
-	rect						frame(inX,inY,FIELD_W,FIELD_H);
-	rectObj*					ourRectObj;
+	rect			frame(inX,inY,FIELD_W,FIELD_H);
+	rectObj*		ourRectObj;
 	watchField*	valueLbl;
-	label*					itemlabel;
+	label*		itemlabel;
 	
 	ourRectObj = new rectObj(&frame);
 	if (ourRectObj) {
