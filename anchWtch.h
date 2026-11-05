@@ -1,8 +1,9 @@
 #ifndef anchWtch_h
 #define anchWtch_h
 
-#include	<lilOS.h>
+#include <rectObj.h>
 #include <fontLabel.h>
+#include	<lilOS.h>
 #include <dispTools.h>
 #include <navPrefs.h>
 
@@ -37,10 +38,10 @@ class setWatchBtn :	public iconButton {
 	virtual	void	doAction(void);
 };
 
+// **********************************************************************
+// anchParam
+// **********************************************************************
 
-// **********************************************************************
-// watchField
-// **********************************************************************
 
 enum paramChoice {
 	
@@ -52,6 +53,35 @@ enum paramChoice {
 	marginParam,
 	swingParam
 };
+
+
+enum paramSource {
+
+	settings,
+	sensors,
+	calcualated,
+	setByUser
+};
+
+
+class anchParam {
+
+	public:
+				anchParam(paramChoice	ourType);
+	virtual	~anchParam(void);
+	
+				void			setValue(float inValue,paramSource inSource);
+				paramChoice getType(void);
+				paramSource getSeouce(void);
+				
+				float			ourParam;
+				paramChoice ourType;
+				paramSource ourSource;		
+};
+
+// **********************************************************************
+// watchField
+// **********************************************************************
 
 
 class watchField :	public valueField {
@@ -70,7 +100,7 @@ class watchField :	public valueField {
 // **********************************************************************
 // anchWtch
 // **********************************************************************
-#include <rectObj.h>
+
 
 class anchWtch :	public panel {
 
